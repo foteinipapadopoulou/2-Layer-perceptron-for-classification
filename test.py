@@ -226,8 +226,8 @@ def ml_softmax_train(t, X, lamda, W1init, W2init, options):
     cost_history = np.zeros(_iter)
     n_batches = int(m / batch_size)
     y = np.copy(t)
-    for it in range(1, _iter + 1):
-        costs = []
+    for it in range(1, _iter ):
+        costs = 0.0
         indices = np.random.permutation(m)
         X = X[indices]
         y = y[indices]
@@ -237,7 +237,7 @@ def ml_softmax_train(t, X, lamda, W1init, W2init, options):
 
             Ew, gradEw1, gradEw2 = cost_grad_softmax(W1, W2, X_i, y_i, lamda)
             # save cost
-            costs.append(Ew)
+            costs+=Ew
 
             # Show the current cost function on screen
             if i % 50 == 0:
@@ -251,13 +251,14 @@ def ml_softmax_train(t, X, lamda, W1init, W2init, options):
             W1 = W1 + eta * gradEw1
             W2 = W2 + eta * gradEw2
             Ewold = Ew
-        cost_history[it] = np.sum(costs)
+        print(costs)
+        cost_history[it] = costs
     return W1, W2, cost_history
 
 
 branch = 3
-X_train = X_train / 255
-X_test = X_test / 255
+X_train = X_train.astype("float32") / 255
+X_test = X_test.astype("float32") / 255
 X_train = np.hstack((np.ones((X_train.shape[0], 1)), X_train))
 X_test = np.hstack((np.ones((X_test.shape[0], 1)), X_test))
 """
@@ -297,7 +298,7 @@ W2init=np.random.randn(K, M)
 lamda = 0.1
 
 # options for gradient descent
-options = [500, 1e-6, 0.5/N]
+options = [100, 1e-6, 0.5/N]
 
 #gradcheck_softmax(Winit, X_train, y_train, lamda)
 
@@ -337,23 +338,4 @@ for i in samples:
     plt.subplot(sqrt_n, sqrt_n, cnt).axis('off')
     plt.imshow(X_test[i, 1:].reshape(28, 28) * 255, cmap='gray')
     plt.title("True: " + str(np.argmax(y_test, 1)[i]) + "\n Predicted: " + str(pred[i]))
-
-plt.show()
-
-plt.figure( figsize=(11,13) )
-cnt = 0
-for i in np.delete( W1, 0, axis=1 ):
-    cnt+=1
-    plt.subplot( 1, 10, cnt ).axis('off')
-    plt.title( cnt-1 )
-    plt.imshow( i.reshape( (28,28) ).reshape(28,28)*255, cmap='gray' )
-plt.show()
-
-plt.figure( figsize=(11,13) )
-cnt = 0
-for i in np.delete( W2, 0, axis=1 ):
-    cnt+=1
-    plt.subplot( 1, 10, cnt ).axis('off')
-    plt.title( cnt-1 )
-    plt.imshow( i.reshape( (28,28) ).reshape(28,28)*255, cmap='gray' )
 plt.show()
